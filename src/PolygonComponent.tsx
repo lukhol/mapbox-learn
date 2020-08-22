@@ -1,7 +1,24 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {MapContext} from "./MapContext";
+import {AnyLayout, AnyPaint} from "mapbox-gl";
 
-const PolygonContainer: React.FC<{}> = ({}) => {
+type LayerType =
+    | 'fill'
+    | 'line'
+    | 'symbol'
+    | 'circle'
+    | 'fill-extrusion'
+    | 'raster'
+    | 'background'
+    | 'heatmap'
+    | 'hillshade';
+
+const PolygonContainer: React.FC<{
+    coordinates: number[][],
+    paint?: AnyPaint,
+    layout?: AnyLayout,
+    type?: LayerType;
+}> = ({ coordinates, layout, paint, type }) => {
    const { map } = useContext(MapContext);
    const [name] = useState(Math.random().toString(36).substring(7));
 
@@ -14,40 +31,17 @@ const PolygonContainer: React.FC<{}> = ({}) => {
                'type': 'Feature',
                'geometry': {
                    'type': 'Polygon',
-                   'coordinates': [
-                       [
-                           [
-                               19.4582891,
-                               51.7613659
-                           ],
-                           [
-                               19.4546843,
-                               51.7590549
-                           ],
-                           [
-                               19.4571626,
-                               51.7582514
-                           ],
-                           [
-                               19.4592011,
-                               51.7602436
-                           ],
-                           [
-                               19.4582891,
-                               51.7613659
-                           ],
-                       ]
-                   ]
+                   'coordinates': [coordinates]
                }
            }
        } as any);
 
        map.addLayer({
            id: name,
-           type: 'fill',
+           type: type || 'fill',
            source: name,
-           layout: {},
-           paint: {
+           layout: layout || {},
+           paint: paint || {
                'fill-color': '#088',
                'fill-opacity': 0.4,
            }

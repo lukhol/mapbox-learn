@@ -1,11 +1,12 @@
 import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {MapContext} from "./MapContext";
+import {MapContext} from "../MapContext";
 import {GeoJSONSource, MapMouseEvent, Marker} from "mapbox-gl";
-import {Feature, FeatureCollection, LineString} from "geojson";
+import {FeatureCollection} from "geojson";
 import polylineLength from '@turf/length';
 import { lineString } from '@turf/helpers';
-import MapBoxControl from "./MapBoxControl";
+import MapBoxControl from "../MapBoxControl";
 import {Tag} from "@blueprintjs/core";
+import PolylineContainer from "../PolylineContainer";
 
 interface MyPoint {
    lng: number,
@@ -13,7 +14,7 @@ interface MyPoint {
    marker?: Marker;
 }
 
-const findLength = (points: MyPoint[], underMousePoint: MyPoint | null, numFromBeginning = points.length) => {
+const findLength = (points: MyPoint[], underMousePoint: MyPoint | null, numFromBeginning = points.length): number => {
    const newPoints = points.map(point => [point.lng, point.lat]);
    if(underMousePoint) {
       newPoints.push([underMousePoint.lng, underMousePoint.lat]);
@@ -37,44 +38,18 @@ const Ruler: React.FC = () => {
 
    const [points, setPoints] = useState<MyPoint[]>([]);
    const [underMousePoint, setUnderMousePoint] = useState<MyPoint | null>(null);
-
-   const [id] = useState(Math.random().toString(36).substring(7));
    const [nodeId] = useState(Math.random().toString(36).substring(7));
-   const [lastPolylineId] = useState(Math.random().toString(36).substring(7));
 
    const length = useMemo(() => {
       return findLength(points, underMousePoint);
    }, [points, underMousePoint]);
 
-
-   const polylineGeoJson: Feature<LineString> = useMemo(() => ({
-      type: 'Feature',
-      geometry: {
-         type: 'LineString',
-         coordinates: [...points.map(point => [point.lng, point.lat])]
-      },
-      properties: {},
-   }) ,[points]);
-
-   const lastPolylineGeoJson: Feature<LineString> = useMemo(() => ({
-      type: 'Feature',
-      geometry: {
-         type: 'LineString',
-         coordinates: [
-             [points[points.length - 1]?.lng || 0, points[points.length - 1]?.lat || 0],
-             [underMousePoint?.lng || 0, underMousePoint?.lat || 0]
-         ],
-      },
-      properties: {},
-   }), [underMousePoint]);
-
    const nodesGeoJson: FeatureCollection = useMemo(() => ({
       type: "FeatureCollection",
       features: points.map((point: MyPoint, index: number) => {
-         const lengthText = `${findLength(points, null, index).toFixed(3)} meters`;
+         const length = findLength(points, null, index);
          if(point.marker) {
-            point.marker.getElement().innerHTML = lengthText;
-            // point.marker.getElement().style.
+            point.marker.getElement().innerHTML = `${length.toFixed(3)} meters`;
          }
 
          return {
@@ -87,29 +62,26 @@ const Ruler: React.FC = () => {
                'marker-color': '#3bb2d0',
                'marker-size': 'large',
                'marker-symbol': 'rocket',
-               description: lengthText,
+               description: `${length.toFixed(3)} meters`,
             },
          };
       }),
    }), [points]);
 
    const removeLayerIfInMap = useCallback(() => {
-      const ids = [id, nodeId, lastPolylineId];
+      const ids = [nodeId];
       ids.forEach(layerId => {
          if(map.getSource(layerId)) {
             map.removeLayer(layerId);
             map.removeSource(layerId);
          }
       });
-   }, [map, id, nodeId, lastPolylineId]);
+   }, [map, nodeId]);
 
    const onClick = useCallback((event: MapMouseEvent) => {
-      console.log('Event on map click', event);
-
       const element = document.createElement('div');
       element.className = 'ruler-marker-container';
       element.addEventListener('click', event => {
-         console.log('Event click', event);
          event.stopPropagation();
          setPoints(prevPoints => (prevPoints.filter(point => point.marker !== marker)));
          marker.remove();
@@ -152,36 +124,12 @@ const Ruler: React.FC = () => {
       }
    }, [map, onClick, onMouseMove]);
 
-   // Points
-   useEffect(() => {
-      (map.getSource(id) as GeoJSONSource)?.setData(polylineGeoJson);
-   }, [map, id, polylineGeoJson]);
-
-   // Last linestring
-   useEffect(() => {
-      (map.getSource(lastPolylineId) as GeoJSONSource)?.setData(lastPolylineGeoJson);
-   }, [map, lastPolylineId, lastPolylineGeoJson]);
-
    // Nodes
    useEffect(() => {
       (map.getSource(nodeId) as GeoJSONSource)?.setData(nodesGeoJson);
    }, [map, nodeId, nodesGeoJson]);
 
    useEffect(() => {
-      map.addSource(id, {
-         type: 'geojson',
-         data: polylineGeoJson,
-      });
-      map.addLayer({
-         id,
-         type: 'line',
-         source: id,
-         paint: {
-            'line-color': '#888',
-            'line-width': 3,
-         },
-      });
-
       map.addSource(nodeId, {
          type: 'geojson',
          data: nodesGeoJson,
@@ -189,27 +137,12 @@ const Ruler: React.FC = () => {
       map.addLayer({
          id: nodeId,
          source: nodeId,
-         // type: 'circle',
-         // paint: {
-         //    'circle-radius': 5,
-         //    'circle-color': '#000'
-         // },
          type: 'symbol',
          layout: {
             'text-field': ['get', 'description'],
             'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
             'text-radial-offset': 0.5,
          }
-      });
-
-      map.addSource(lastPolylineId, {
-         type: 'geojson',
-         data: lastPolylineGeoJson,
-      });
-      map.addLayer({
-         id: lastPolylineId,
-         type: 'line',
-         source: lastPolylineId,
       });
 
       return removeLayerIfInMap;
@@ -222,11 +155,30 @@ const Ruler: React.FC = () => {
    }, []);
 
    return (
-       <MapBoxControl>
-          <Tag>
-             {length.toFixed(3)} m
-          </Tag>
-       </MapBoxControl>
+       <>
+          <PolylineContainer
+              coordinates={[
+                  ...points.map(point => [point.lng, point.lat])
+              ]}
+              paint={{
+                 'line-color': '#888',
+                 'line-width': 3,
+              }}
+          />
+          {points.length > 0 && underMousePoint && (
+              <PolylineContainer
+                  coordinates={[
+                     [points[points.length - 1].lng, points[points.length - 1].lat],
+                     [underMousePoint.lng, underMousePoint.lat]
+                  ]}
+              />
+          )}
+          <MapBoxControl>
+             <Tag>
+                {length.toFixed(3)} m
+             </Tag>
+          </MapBoxControl>
+       </>
    );
 };
 

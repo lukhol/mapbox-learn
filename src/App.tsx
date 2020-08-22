@@ -6,7 +6,7 @@ import {OpenStreetMapTerrain} from "./OpenStreetMapTerrain";
 import {OpenStreetMapLayer} from "./OpenStreetMap";
 import {MapContext} from "./MapContext";
 import PolygonContainer from "./PolygonComponent";
-import Ruler from "./Ruler";
+import Ruler from "./Ruler/Ruler";
 import MapBoxControl from "./MapBoxControl";
 
 const SomeComponent = () => {
@@ -79,6 +79,29 @@ const Application = () => {
     setVisibleLayers(currentLayers);
   };
 
+  const polygonCoords = [
+    [
+      19.4582891,
+      51.7613659
+    ],
+    [
+      19.4546843,
+      51.7590549
+    ],
+    [
+      19.4571626,
+      51.7582514
+    ],
+    [
+      19.4592011,
+      51.7602436
+    ],
+    [
+      19.4582891,
+      51.7613659
+    ],
+  ];
+
   return (
       <div>
         <MapContainer>
@@ -98,7 +121,11 @@ const Application = () => {
             <SomeComponent />
             {visibleLayers.has(OPEN_STREET_MAP) && <OpenStreetMapLayer />}
             {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
-            {visibleLayers.has(POLYGON) && <PolygonContainer />}
+            {visibleLayers.has(POLYGON) && (
+                <PolygonContainer
+                  coordinates={polygonCoords}
+                />
+            )}
             {visibleLayers.has(RULER) && <Ruler />}
           </div>
         </MapContainer>
