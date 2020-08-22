@@ -80,7 +80,7 @@ const Ruler: React.FC = () => {
 
    const onClick = useCallback((event: MapMouseEvent) => {
       const element = document.createElement('div');
-      element.className = 'ruler-marker-container';
+      // element.className = 'ruler-marker-container';
       element.addEventListener('click', event => {
          event.stopPropagation();
          setPoints(prevPoints => (prevPoints.filter(point => point.marker !== marker)));
@@ -137,12 +137,26 @@ const Ruler: React.FC = () => {
       map.addLayer({
          id: nodeId,
          source: nodeId,
-         type: 'symbol',
-         layout: {
-            'text-field': ['get', 'description'],
-            'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-            'text-radial-offset': 0.5,
-         }
+         // Symbol example (with text)
+         // type: 'symbol',
+         // layout: {
+         //    'text-field': ['get', 'description'],
+         //    'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+         //    'text-radial-offset': 0.5,
+         // },
+
+         type: 'circle',
+         paint: {
+            "circle-radius": [
+               "interpolate", ["linear"], ["zoom"],
+               // zoom is 10 (or less) -> circle radius will be 20px
+               10, 20,
+               // zoom is 14 (or greater) -> circle radius will be 10px
+               14, 10,
+            ],
+            "circle-stroke-width": 4,
+            "circle-color": '#ccc',
+         },
       });
 
       return removeLayerIfInMap;
