@@ -4,26 +4,15 @@
   height: 100vh;
 }
 
-.map-control {
+.mapboxgl-control-container-absolute {
   position: absolute;
 }
 
-.map-control.map-control-top-left {
-  top: 0;
-  left: 0;
-}
-
-.map-control.map-control-top-right {
-  top: 0;
-  right: 0;
-}
-
-.map-control.map-control-bottom-left {
-  bottom: 0;
-  left: 0;
-}
-
-.map-control.map-control-bottom-right {
-  bottom: 0;
-  right: 0;
+.ruler-marker-container {
+  background-color: #2e67ff;
+  color: #fff;
+  background-size: cover;
+  padding: 2px 5px;
+  border-radius: 5px;
+  cursor: pointer;
 }

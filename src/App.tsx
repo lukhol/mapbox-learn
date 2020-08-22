@@ -6,7 +6,8 @@ import {OpenStreetMapTerrain} from "./OpenStreetMapTerrain";
 import {OpenStreetMapLayer} from "./OpenStreetMap";
 import {MapContext} from "./MapContext";
 import PolygonContainer from "./PolygonComponent";
-import DrawPolygon from "./DrawPolygon";
+import Ruler from "./Ruler";
+import MapBoxControl from "./MapBoxControl";
 
 const SomeComponent = () => {
   const { map } = React.useContext(MapContext);
@@ -57,13 +58,13 @@ const Application = () => {
   const OPEN_STREET_MAP = "Open Street Map";
   const OPEN_STREET_MAP_TERRAIN = 'Open Street Map Terrain';
   const POLYGON = 'Sample polygon';
-  const DRAW_POLYGON = 'Draw polygon';
+  const RULER = 'Ruler';
 
   const LAYERS = [
       OPEN_STREET_MAP,
       OPEN_STREET_MAP_TERRAIN,
       POLYGON,
-      DRAW_POLYGON
+      RULER
   ];
 
   const layerCheckboxClicked = (event: any) => {
@@ -81,22 +82,25 @@ const Application = () => {
   return (
       <div>
         <MapContainer>
-          <div className="map-control map-control-top-left" style={{margin: 8}}>
-            <Card>
-              {LAYERS.map(layerName => (
-                  <Checkbox
-                      label={layerName}
-                      value={layerName}
-                      onChange={layerCheckboxClicked}
-                  />
-              ))}
-            </Card>
+          <div className="mapboxgl-control-container">
+            <MapBoxControl>
+              <Card>
+                {LAYERS.map(layerName => (
+                    <Checkbox
+                        key={layerName}
+                        label={layerName}
+                        value={layerName}
+                        onChange={layerCheckboxClicked}
+                    />
+                ))}
+              </Card>
+            </MapBoxControl>
+            <SomeComponent />
+            {visibleLayers.has(OPEN_STREET_MAP) && <OpenStreetMapLayer />}
+            {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
+            {visibleLayers.has(POLYGON) && <PolygonContainer />}
+            {visibleLayers.has(RULER) && <Ruler />}
           </div>
-          <SomeComponent />
-          {visibleLayers.has(OPEN_STREET_MAP) && <OpenStreetMapLayer />}
-          {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
-          {visibleLayers.has(POLYGON) && <PolygonContainer />}
-          {visibleLayers.has(DRAW_POLYGON) && <DrawPolygon />}
         </MapContainer>
       </div>
   )
