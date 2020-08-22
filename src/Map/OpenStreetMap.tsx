@@ -1,5 +1,5 @@
 import React from "react";
-import {MapContext} from "./MapContext";
+import {MapContext} from "../MapBox/MapContext";
 
 export const OpenStreetMapLayer = () => {
     const { map } = React.useContext(MapContext);

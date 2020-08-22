@@ -80,7 +80,7 @@ const Ruler: React.FC = () => {
 
    const onClick = useCallback((event: MapMouseEvent) => {
       const element = document.createElement('div');
-      // element.className = 'ruler-marker-container';
+      element.className = 'ruler-marker-container';
       element.addEventListener('click', event => {
          event.stopPropagation();
          setPoints(prevPoints => (prevPoints.filter(point => point.marker !== marker)));

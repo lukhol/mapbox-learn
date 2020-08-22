@@ -10,7 +10,7 @@ export const MapContainer: React.FC<{}> = ({children}) => {
         if(mapRef.current) {
             const map = new Map({
                 container: mapRef.current!,
-                style: 'mapbox://styles/mapbox/streets-v9',
+                style: 'mapbox://styles/mapbox/empty-v9',
                 center: [19.457216, 51.759445],
                 zoom: 14,
                 accessToken: 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA',

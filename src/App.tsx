@@ -1,14 +1,13 @@
 import React from 'react';
-import './App.css';
 import { Checkbox, Card } from '@blueprintjs/core';
-import {OpenStreetMapTerrain} from "./OpenStreetMapTerrain";
-import {OpenStreetMapLayer} from "./OpenStreetMap";
-import PolygonContainer from "./PolygonComponent";
-import Ruler from "./Ruler/Ruler";
-import MapBoxControl from "./MapBoxControl";
-import {MapContainer} from "./MapContainer";
-import {SingleMarker} from "./SingleMarker";
-import {useVisibleLayers} from "./useVisibleLayers";
+import {OpenStreetMapTerrain} from "./Map/OpenStreetMapTerrain";
+import {OpenStreetMapLayer} from "./Map/OpenStreetMap";
+import PolygonContainer from "./MapBox/PolygonComponent";
+import Ruler from "./MapBox/Ruler/Ruler";
+import MapBoxControl from "./MapBox/MapBoxControl";
+import {MapContainer} from "./MapBox/MapContainer";
+import {SingleMarker} from "./Map/SingleMarker";
+import {useVisibleLayers} from "./Map/useVisibleLayers";
 
 const Application = () => {
   const RAND_MARKER = 'Rand marker';
@@ -19,7 +18,6 @@ const Application = () => {
 
   const LAYERS = [
     RAND_MARKER,
-    OPEN_STREET_MAP,
     OPEN_STREET_MAP_TERRAIN,
     POLYGON,
     RULER
@@ -67,8 +65,8 @@ const Application = () => {
                 ))}
               </Card>
             </MapBoxControl>
+            <OpenStreetMapLayer />
             {visibleLayers.has(RAND_MARKER) && <SingleMarker />}
-            {visibleLayers.has(OPEN_STREET_MAP) && <OpenStreetMapLayer />}
             {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
             {visibleLayers.has(POLYGON) && (
                 <PolygonContainer
