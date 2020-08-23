@@ -3,9 +3,9 @@ import {MapContext} from "../MapContext";
 import {GeoJSONSource, MapMouseEvent, Marker} from "mapbox-gl";
 import {FeatureCollection} from "geojson";
 import polylineLength from '@turf/length';
-import { lineString } from '@turf/helpers';
+import {lineString, Units} from '@turf/helpers';
 import MapBoxControl from "../MapBoxControl";
-import {Tag} from "@blueprintjs/core";
+import {HTMLSelect, Tag, Card} from "@blueprintjs/core";
 import PolylineContainer from "../PolylineContainer";
 
 interface MyPoint {
@@ -14,7 +14,7 @@ interface MyPoint {
    marker?: Marker;
 }
 
-const findLength = (points: MyPoint[], underMousePoint: MyPoint | null, numFromBeginning = points.length): number => {
+const calculateLength = (points: MyPoint[], underMousePoint: MyPoint | null, units: Units = 'meters', numFromBeginning = points.length): number => {
    const newPoints = points.map(point => [point.lng, point.lat]);
    if(underMousePoint) {
       newPoints.push([underMousePoint.lng, underMousePoint.lat]);
@@ -28,7 +28,7 @@ const findLength = (points: MyPoint[], underMousePoint: MyPoint | null, numFromB
 
    return polylineLength(lineString([
        ...filteredPoints,
-   ]), { units: 'meters' });
+   ]), { units: units });
 };
 
 const markers: Marker[] = [];
@@ -39,17 +39,18 @@ const Ruler: React.FC = () => {
    const [points, setPoints] = useState<MyPoint[]>([]);
    const [underMousePoint, setUnderMousePoint] = useState<MyPoint | null>(null);
    const [nodeId] = useState(Math.random().toString(36).substring(7));
+   const [units, setUnits] = useState<Units>('kilometers');
 
    const length = useMemo(() => {
-      return findLength(points, underMousePoint);
+      return calculateLength(points, underMousePoint);
    }, [points, underMousePoint]);
 
    const nodesGeoJson: FeatureCollection = useMemo(() => ({
       type: "FeatureCollection",
       features: points.map((point: MyPoint, index: number) => {
-         const length = findLength(points, null, index);
+         const length = calculateLength(points, null, units, index);
          if(point.marker) {
-            point.marker.getElement().innerHTML = `${length.toFixed(3)} meters`;
+            point.marker.getElement().innerHTML = `${length.toFixed(3)} ${units}`;
          }
 
          return {
@@ -59,14 +60,11 @@ const Ruler: React.FC = () => {
                coordinates: [point.lng, point.lat],
             },
             properties: {
-               'marker-color': '#3bb2d0',
-               'marker-size': 'large',
-               'marker-symbol': 'rocket',
-               description: `${length.toFixed(3)} meters`,
+               description: `${length.toFixed(3)} ${units}`,
             },
          };
       }),
-   }), [points]);
+   }), [points, units]);
 
    const removeLayerIfInMap = useCallback(() => {
       const ids = [nodeId];
@@ -150,9 +148,10 @@ const Ruler: React.FC = () => {
             "circle-radius": [
                "interpolate", ["linear"], ["zoom"],
                // zoom is 10 (or less) -> circle radius will be 20px
-               10, 20,
+               10, 2,
                // zoom is 14 (or greater) -> circle radius will be 10px
-               14, 10,
+               14, 8,
+               15, 25
             ],
             "circle-stroke-width": 4,
             "circle-color": '#ccc',
@@ -187,10 +186,24 @@ const Ruler: React.FC = () => {
                   ]}
               />
           )}
-          <MapBoxControl>
-             <Tag>
-                {length.toFixed(3)} m
-             </Tag>
+          <MapBoxControl icon="settings" defaultIsOpen={true}>
+             <div style={{marginBottom: "8px"}}>
+                <Tag>
+                   {length.toFixed(3)} m
+                </Tag>
+             </div>
+
+             <HTMLSelect
+                 value={units}
+                 onChange={(event) => setUnits(event.target.value as Units)}
+             >
+                <option value="miles">Miles</option>
+                <option value="kilometers">Kilometers</option>
+                <option value="feet">Feet</option>
+                <option value="meters">Meters</option>
+                <option value="centimeters">Centimeters</option>
+                <option value="millimeters">Millimeters</option>
+             </HTMLSelect>
           </MapBoxControl>
        </>
    );

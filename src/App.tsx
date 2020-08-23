@@ -51,30 +51,27 @@ const Application = () => {
   return (
       <div>
         <MapContainer>
-          <div className="mapboxgl-control-container">
-            <MapBoxControl>
-              <Card>
-                {LAYERS.map(layerName => (
-                    <Checkbox
-                        checked={visibleLayers.has(layerName)}
-                        key={layerName}
-                        label={layerName}
-                        value={layerName}
-                        onChange={onChange}
-                    />
-                ))}
-              </Card>
-            </MapBoxControl>
-            <OpenStreetMapLayer />
-            {visibleLayers.has(RAND_MARKER) && <SingleMarker />}
-            {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
-            {visibleLayers.has(POLYGON) && (
-                <PolygonContainer
-                  coordinates={polygonCoords}
+          <MapBoxControl icon="layers">
+            <strong>Legend</strong>
+            {LAYERS.map(layerName => (
+                <Checkbox
+                    checked={visibleLayers.has(layerName)}
+                    key={layerName}
+                    label={layerName}
+                    value={layerName}
+                    onChange={onChange}
                 />
-            )}
-            {visibleLayers.has(RULER) && <Ruler />}
-          </div>
+            ))}
+          </MapBoxControl>
+          <OpenStreetMapLayer />
+          {visibleLayers.has(RAND_MARKER) && <SingleMarker />}
+          {visibleLayers.has(OPEN_STREET_MAP_TERRAIN) && <OpenStreetMapTerrain/>}
+          {visibleLayers.has(POLYGON) && (
+              <PolygonContainer
+                  coordinates={polygonCoords}
+              />
+          )}
+          {visibleLayers.has(RULER) && <Ruler />}
         </MapContainer>
       </div>
   )

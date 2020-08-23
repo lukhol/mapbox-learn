@@ -16,13 +16,18 @@ code {
 }
 
 .map-container {
+  height: 100vh;
+
   display: flex;
   position: relative;
-  height: 100vh;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
-.mapboxgl-control-container-absolute {
-  position: absolute;
+.map-container .mapboxgl-control-container-relative {
+  z-index: 1;
+  position: relative;
 }
 
 .ruler-marker-container {

@@ -11,6 +11,10 @@ export const SingleMarker = () => {
             .setLngLat([19.457216, 51.759445])
             .addTo(map);
         setMarker(marker);
+
+        return () => {
+            marker.remove();
+        }
     }, [map]);
 
     return null;
