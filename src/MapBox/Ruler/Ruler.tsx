@@ -5,7 +5,7 @@ import {FeatureCollection} from "geojson";
 import polylineLength from '@turf/length';
 import {lineString, Units} from '@turf/helpers';
 import MapBoxControl from "../MapBoxControl";
-import {HTMLSelect, Tag, Card} from "@blueprintjs/core";
+import {HTMLSelect, Tag, Card, Checkbox} from "@blueprintjs/core";
 import PolylineContainer from "../PolylineContainer";
 
 interface MyPoint {
@@ -40,6 +40,7 @@ const Ruler: React.FC = () => {
    const [underMousePoint, setUnderMousePoint] = useState<MyPoint | null>(null);
    const [nodeId] = useState(Math.random().toString(36).substring(7));
    const [units, setUnits] = useState<Units>('kilometers');
+   const [withLabel, setWithLabel] = useState(true);
 
    const length = useMemo(() => {
       return calculateLength(points, underMousePoint);
@@ -79,6 +80,7 @@ const Ruler: React.FC = () => {
    const onClick = useCallback((event: MapMouseEvent) => {
       const element = document.createElement('div');
       element.className = 'ruler-marker-container';
+      element.style.display = withLabel ? 'block' : 'none';
       element.addEventListener('click', event => {
          event.stopPropagation();
          setPoints(prevPoints => (prevPoints.filter(point => point.marker !== marker)));
@@ -99,7 +101,7 @@ const Ruler: React.FC = () => {
             },
          ]
       });
-   }, [setPoints]);
+   }, [setPoints, withLabel]);
 
    const onMouseMove = useCallback((event: MapMouseEvent) => {
       if(points.length === 0) {
@@ -148,12 +150,11 @@ const Ruler: React.FC = () => {
             "circle-radius": [
                "interpolate", ["linear"], ["zoom"],
                // zoom is 10 (or less) -> circle radius will be 20px
-               10, 2,
+               10, 3,
                // zoom is 14 (or greater) -> circle radius will be 10px
-               14, 8,
-               15, 25
+               14, 3,
             ],
-            "circle-stroke-width": 4,
+            "circle-stroke-width": 2,
             "circle-color": '#ccc',
          },
       });
@@ -193,6 +194,13 @@ const Ruler: React.FC = () => {
                 </Tag>
              </div>
 
+             <Checkbox label="With label" checked={withLabel} onChange={() => {
+                setWithLabel(prevWithLabel => {
+                   const display = prevWithLabel ? "none" : "block";
+                   markers.forEach(marker => marker.getElement().style.display = display);
+                   return !prevWithLabel;
+                });
+             }} />
              <HTMLSelect
                  value={units}
                  onChange={(event) => setUnits(event.target.value as Units)}
